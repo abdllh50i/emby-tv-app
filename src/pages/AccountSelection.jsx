@@ -12,12 +12,23 @@ function AccountSelection({ onLogin }) {
   const [error, setError] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [rememberedUsers, setRememberedUsers] = useState({});
 
   useEffect(() => {
     const savedServerUrl = localStorage.getItem('emby_serverUrl');
     if (savedServerUrl) {
       setServerUrl(savedServerUrl);
       fetchPublicUsers(savedServerUrl);
+    }
+    
+    // Load remembered users
+    const savedRememberedUsers = localStorage.getItem('emby_rememberedUsers');
+    if (savedRememberedUsers) {
+      try {
+        setRememberedUsers(JSON.parse(savedRememberedUsers));
+      } catch (e) {
+        console.error('Failed to parse remembered users:', e);
+      }
     }
   }, []);
 
@@ -44,10 +55,18 @@ function AccountSelection({ onLogin }) {
   };
 
   const handleUserSelect = (user) => {
-    setSelectedUser(user);
-    setShowPasswordInput(true);
-    setPassword('');
-    setError('');
+    // Check if user is remembered (has stored token)
+    const userKey = `${serverUrl}_${user.Id}`;
+    if (rememberedUsers[userKey]) {
+      // Auto-login with stored credentials
+      onLogin(rememberedUsers[userKey].token, user.Id, serverUrl);
+    } else {
+      // Show password input
+      setSelectedUser(user);
+      setShowPasswordInput(true);
+      setPassword('');
+      setError('');
+    }
   };
 
   const handleLogin = async (e) => {
@@ -62,6 +81,20 @@ function AccountSelection({ onLogin }) {
         selectedUser.Name,
         password
       );
+      
+      // Save user as remembered
+      const userKey = `${serverUrl}_${selectedUser.Id}`;
+      const updatedRememberedUsers = {
+        ...rememberedUsers,
+        [userKey]: {
+          token: authData.AccessToken,
+          userName: selectedUser.Name,
+          userId: selectedUser.Id,
+        }
+      };
+      setRememberedUsers(updatedRememberedUsers);
+      localStorage.setItem('emby_rememberedUsers', JSON.stringify(updatedRememberedUsers));
+      
       onLogin(authData.AccessToken, authData.User.Id, serverUrl);
     } catch (err) {
       setError('Invalid password. Please try again.');
@@ -201,32 +234,44 @@ function AccountSelection({ onLogin }) {
           >
             <h2>Who&apos;s watching?</h2>
             <div className="users-list">
-              {users.map((user, index) => (
-                <motion.div
-                  key={user.Id}
-                  className={`user-card ${focusedIndex === index ? 'focused' : ''}`}
-                  onClick={() => handleUserSelect(user)}
-                  whileHover={{ scale: 1.1, y: -10 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <div className="user-avatar">
-                    {user.PrimaryImageTag ? (
-                      <img
-                        src={embyService.getImageUrl(user.Id, 'Primary', 200)}
-                        alt={user.Name}
-                      />
-                    ) : (
-                      <div className="avatar-placeholder">
-                        {user.Name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <p className="user-name">{user.Name}</p>
-                </motion.div>
-              ))}
+              {users.map((user, index) => {
+                const userKey = `${serverUrl}_${user.Id}`;
+                const isRemembered = rememberedUsers[userKey];
+                
+                return (
+                  <motion.div
+                    key={user.Id}
+                    className={`user-card ${focusedIndex === index ? 'focused' : ''} ${isRemembered ? 'remembered' : ''}`}
+                    onClick={() => handleUserSelect(user)}
+                    whileHover={{ scale: 1.1, y: -10 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="user-avatar">
+                      {user.PrimaryImageTag ? (
+                        <img
+                          src={embyService.getImageUrl(user.Id, 'Primary', 200)}
+                          alt={user.Name}
+                        />
+                      ) : (
+                        <div className="avatar-placeholder">
+                          {user.Name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      {isRemembered && (
+                        <div className="remembered-badge">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <p className="user-name">{user.Name}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         )}

@@ -113,6 +113,10 @@
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
+.user-card.remembered .user-avatar {
+  border: 3px solid var(--accent-color);
+}
+
 .user-avatar {
   width: 150px;
   height: 150px;
@@ -125,6 +129,22 @@
   justify-content: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.remembered-badge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .user-card:hover .user-avatar {

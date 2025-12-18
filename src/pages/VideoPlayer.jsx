@@ -73,6 +73,25 @@ function VideoPlayer() {
     }
   };
 
+  // Attempt to play video when stream URL is set
+  useEffect(() => {
+    if (streamUrl && videoRef.current) {
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Video started playing successfully
+            console.log('Video playback started');
+          })
+          .catch((error) => {
+            // Autoplay was prevented, user needs to interact
+            console.log('Autoplay prevented:', error);
+            setShowControls(true);
+          });
+      }
+    }
+  }, [streamUrl]);
+
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (isPlaying) {
