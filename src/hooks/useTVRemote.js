@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// Navigation keys that should prevent default browser behavior
+const NAVIGATION_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
+
 /**
  * Custom hook for TV remote control navigation
  * Handles directional navigation, selection, and back actions
@@ -20,7 +23,7 @@ export const useTVRemote = (options = {}) => {
     if (!enabled) return;
 
     // Prevent default browser behavior for arrow keys
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(e.key)) {
+    if (NAVIGATION_KEYS.includes(e.key)) {
       e.preventDefault();
     }
 

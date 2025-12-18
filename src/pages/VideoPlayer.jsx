@@ -112,17 +112,21 @@ function VideoPlayer() {
       };
 
       const video = videoRef.current;
-      video.addEventListener('canplay', handleCanPlay);
-      video.addEventListener('waiting', handleWaiting);
-      video.addEventListener('playing', handlePlaying);
-      video.addEventListener('error', handleError);
+      if (video) {
+        video.addEventListener('canplay', handleCanPlay);
+        video.addEventListener('waiting', handleWaiting);
+        video.addEventListener('playing', handlePlaying);
+        video.addEventListener('error', handleError);
 
-      return () => {
-        video.removeEventListener('canplay', handleCanPlay);
-        video.removeEventListener('waiting', handleWaiting);
-        video.removeEventListener('playing', handlePlaying);
-        video.removeEventListener('error', handleError);
-      };
+        return () => {
+          if (video) {
+            video.removeEventListener('canplay', handleCanPlay);
+            video.removeEventListener('waiting', handleWaiting);
+            video.removeEventListener('playing', handlePlaying);
+            video.removeEventListener('error', handleError);
+          }
+        };
+      }
     }
   }, [streamUrl, readyToPlay, itemId]);
 

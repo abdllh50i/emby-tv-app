@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+// Stream configuration constants
+const STREAM_CONFIG = {
+  VIDEO_CODECS: 'h264,mpeg4,mpeg2video',
+  AUDIO_CODECS: 'aac,mp3,ac3,dca,dts',
+  MAX_BITRATE: '140000000',
+};
+
 class EmbyService {
   constructor() {
     this.baseUrl = localStorage.getItem('emby_serverUrl') || '';
@@ -202,9 +209,9 @@ class EmbyService {
       MediaSourceId: mediaSourceId || itemId,
       DeviceId: 'emby-tv-app',
       api_key: this.token,
-      VideoCodec: 'h264,mpeg4,mpeg2video',
-      AudioCodec: 'aac,mp3,ac3,dca,dts',
-      MaxStreamingBitrate: '140000000',
+      VideoCodec: STREAM_CONFIG.VIDEO_CODECS,
+      AudioCodec: STREAM_CONFIG.AUDIO_CODECS,
+      MaxStreamingBitrate: STREAM_CONFIG.MAX_BITRATE,
       VideoStreamIndex: '0',
       AudioStreamIndex: '1',
       SubtitleStreamIndex: '-1',
