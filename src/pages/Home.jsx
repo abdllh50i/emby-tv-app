@@ -134,9 +134,10 @@ function Home({ onLogout }) {
               <div className="hero-actions">
                 <motion.button
                   className="play-button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.08, boxShadow: '0 10px 30px rgba(255, 255, 255, 0.3)' }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => handleItemClick(featuredItem)}
+                  transition={{ duration: 0.2 }}
                 >
                   <svg
                     width="24"
@@ -150,8 +151,9 @@ function Home({ onLogout }) {
                 </motion.button>
                 <motion.button
                   className="info-button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.08, backgroundColor: 'rgba(255, 255, 255, 0.35)' }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
                 >
                   More Info
                 </motion.button>

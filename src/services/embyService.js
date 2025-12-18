@@ -202,8 +202,15 @@ class EmbyService {
       MediaSourceId: mediaSourceId || itemId,
       DeviceId: 'emby-tv-app',
       api_key: this.token,
+      VideoCodec: 'h264,mpeg4,mpeg2video',
+      AudioCodec: 'aac,mp3,ac3,dca,dts',
+      MaxStreamingBitrate: '140000000',
+      VideoStreamIndex: '0',
+      AudioStreamIndex: '1',
+      SubtitleStreamIndex: '-1',
+      EnableAutoStreamCopy: 'true',
     });
-    return `${this.baseUrl}/Videos/${itemId}/stream?${params.toString()}`;
+    return `${this.baseUrl}/Videos/${itemId}/stream.mp4?${params.toString()}`;
   }
 
   // Get image URL

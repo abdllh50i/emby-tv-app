@@ -17,6 +17,7 @@ function VideoPlayer() {
   const [selectedSubtitle, setSelectedSubtitle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [readyToPlay, setReadyToPlay] = useState(false);
   
   // Player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -27,6 +28,7 @@ function VideoPlayer() {
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
+  const [buffering, setBuffering] = useState(false);
 
   useEffect(() => {
     fetchMediaData();
@@ -75,30 +77,71 @@ function VideoPlayer() {
 
   // Attempt to play video when stream URL is set
   useEffect(() => {
-    if (streamUrl && videoRef.current) {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // Video started playing successfully
-            console.log('Video playback started');
-          })
-          .catch((error) => {
-            // Autoplay was prevented, user needs to interact
-            console.log('Autoplay prevented:', error);
-            setShowControls(true);
-          });
-      }
+    if (streamUrl && videoRef.current && !readyToPlay) {
+      // Wait for video to be ready
+      const handleCanPlay = () => {
+        setReadyToPlay(true);
+        setBuffering(false);
+        // Try to autoplay
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Video playback started successfully');
+              embyService.reportPlaybackStart(itemId, 0);
+            })
+            .catch((error) => {
+              console.log('Autoplay prevented, showing play button:', error);
+              setShowControls(true);
+            });
+        }
+      };
+
+      const handleWaiting = () => {
+        setBuffering(true);
+      };
+
+      const handlePlaying = () => {
+        setBuffering(false);
+      };
+
+      const handleError = (e) => {
+        console.error('Video error:', e);
+        setError('Failed to load video stream. Please check your connection.');
+        setBuffering(false);
+      };
+
+      const video = videoRef.current;
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('waiting', handleWaiting);
+      video.addEventListener('playing', handlePlaying);
+      video.addEventListener('error', handleError);
+
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay);
+        video.removeEventListener('waiting', handleWaiting);
+        video.removeEventListener('playing', handlePlaying);
+        video.removeEventListener('error', handleError);
+      };
     }
-  }, [streamUrl]);
+  }, [streamUrl, readyToPlay, itemId]);
 
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play();
-        embyService.reportPlaybackStart(itemId, Math.floor(currentTime * 10000000));
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              embyService.reportPlaybackStart(itemId, Math.floor(currentTime * 10000000));
+            })
+            .catch((error) => {
+              console.error('Play error:', error);
+              setError('Unable to play video. Please try again.');
+            });
+        }
       }
     }
   };
@@ -320,12 +363,12 @@ function VideoPlayer() {
         ref={videoRef}
         className="video-element"
         src={streamUrl}
-        autoPlay
+        playsInline
+        preload="auto"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
-        crossOrigin="anonymous"
       >
         {selectedSubtitle && (
           <track
@@ -337,6 +380,35 @@ function VideoPlayer() {
           />
         )}
       </video>
+
+      {/* Buffering Indicator */}
+      {buffering && (
+        <div className="buffering-overlay">
+          <div className="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      )}
+
+      {/* Initial Play Button (if autoplay fails) */}
+      {!isPlaying && readyToPlay && showControls && (
+        <motion.div
+          className="initial-play-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.button
+            className="big-play-button"
+            onClick={handlePlayPause}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </motion.button>
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {showControls && (

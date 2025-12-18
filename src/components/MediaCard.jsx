@@ -11,14 +11,19 @@ function MediaCard({ item, onClick, index = 0, isFocused = false }) {
       onClick={() => onClick(item)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      whileHover={{ 
-        scale: 1.08, 
-        y: -10,
-        zIndex: 10,
-        transition: { duration: 0.2 }
+      transition={{ 
+        delay: index * 0.05, 
+        duration: 0.4,
+        ease: [0.25, 0.1, 0.25, 1]
       }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ 
+        scale: 1.12, 
+        y: -15,
+        zIndex: 10,
+        boxShadow: '0 20px 60px rgba(0, 113, 227, 0.4)',
+        transition: { duration: 0.3, ease: 'easeOut' }
+      }}
+      whileTap={{ scale: 0.98 }}
     >
       <div className="card-image-wrapper">
         <img
