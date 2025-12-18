@@ -1,0 +1,112 @@
+.media-card {
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: var(--bg-card);
+}
+
+.media-card.focused {
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.media-card:hover .card-image {
+  transform: scale(1.1);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.media-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.card-play-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.media-card:hover .card-play-icon {
+  transform: scale(1);
+}
+
+.card-info {
+  padding: 1rem 0.5rem;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-meta {
+  display: flex;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.card-year,
+.card-type {
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-info {
+    padding: 0.8rem 0.3rem;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+  }
+
+  .card-meta {
+    font-size: 0.8rem;
+  }
+
+  .card-play-icon {
+    width: 50px;
+    height: 50px;
+  }
+}
