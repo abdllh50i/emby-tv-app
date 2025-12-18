@@ -46,8 +46,8 @@
 /* Series Info Section */
 .series-info-section {
   position: relative;
-  min-height: 500px;
-  margin-bottom: 3rem;
+  min-height: 400px;
+  margin-bottom: 2rem;
 }
 
 .series-backdrop {
@@ -78,18 +78,18 @@
 .series-info-content {
   position: relative;
   display: flex;
-  gap: 3rem;
-  padding: 4rem 3rem;
+  gap: 2rem;
+  padding: 3rem 3rem 2rem;
   max-width: 1920px;
   margin: 0 auto;
 }
 
 .series-poster {
   flex-shrink: 0;
-  width: 300px;
+  width: 220px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 .series-poster img {
@@ -100,13 +100,13 @@
 
 .series-meta {
   flex: 1;
-  padding-top: 2rem;
+  padding-top: 1rem;
 }
 
 .series-title {
-  font-size: 3rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   color: var(--text-primary);
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
@@ -114,8 +114,8 @@
 .series-details-meta {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
 }
 
 .meta-item {
@@ -130,10 +130,10 @@
 }
 
 .series-overview {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--text-primary);
-  max-width: 800px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 700px;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
@@ -151,12 +151,12 @@
 }
 
 .season-tab {
-  padding: 0.8rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -182,24 +182,24 @@
 }
 
 .episodes-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
   color: var(--text-primary);
 }
 
 .episodes-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .episode-card {
   display: flex;
-  gap: 2rem;
-  background: rgba(42, 42, 42, 0.5);
-  border-radius: 12px;
-  padding: 1rem;
+  gap: 1.5rem;
+  background: rgba(42, 42, 42, 0.4);
+  border-radius: 10px;
+  padding: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
@@ -218,7 +218,7 @@
 .episode-image {
   position: relative;
   flex-shrink: 0;
-  width: 280px;
+  width: 220px;
   aspect-ratio: 16/9;
   border-radius: 8px;
   overflow: hidden;
@@ -233,28 +233,29 @@
 
 .episode-number {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: rgba(0, 0, 0, 0.8);
+  top: 0.4rem;
+  left: 0.4rem;
+  background: rgba(0, 0, 0, 0.85);
   color: var(--text-primary);
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
 .played-indicator {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 0.4rem;
+  right: 0.4rem;
   background: var(--accent-color);
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.75rem;
 }
 
 .episode-info {
@@ -266,23 +267,27 @@
 }
 
 .episode-title {
-  font-size: 1.3rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.3rem;
 }
 
 .episode-runtime {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
 
 .episode-overview {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Responsive Design */
