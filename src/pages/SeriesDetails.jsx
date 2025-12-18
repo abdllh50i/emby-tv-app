@@ -82,9 +82,12 @@ function SeriesDetails() {
           break;
         case 'Enter':
           e.preventDefault();
-          if (episodes[focusedEpisodeIndex]) {
-            handleEpisodeClick(episodes[focusedEpisodeIndex]);
-          }
+          setFocusedEpisodeIndex((current) => {
+            if (episodes[current]) {
+              handleEpisodeClick(episodes[current]);
+            }
+            return current;
+          });
           break;
         case 'Escape':
           e.preventDefault();
@@ -97,7 +100,7 @@ function SeriesDetails() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [episodes, focusedEpisodeIndex]);
+  }, [episodes]);
 
   if (loading) {
     return (
