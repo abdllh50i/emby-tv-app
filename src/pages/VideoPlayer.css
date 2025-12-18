@@ -151,8 +151,10 @@
   transition: all 0.3s ease;
 }
 
-.back-button:hover {
-  background: rgba(0, 0, 0, 0.8);
+.back-button:hover,
+.back-button.focused {
+  background: rgba(0, 113, 227, 0.8);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.4);
   transform: scale(1.1);
 }
 
@@ -192,8 +194,10 @@
   transition: height 0.2s ease;
 }
 
-.progress-bar:hover {
+.progress-bar:hover,
+.progress-bar.focused {
   height: 12px;
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.5);
 }
 
 .progress-filled {
@@ -231,9 +235,24 @@
   transition: all 0.3s ease;
 }
 
-.control-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+.control-button:hover,
+.control-button.focused {
+  background: rgba(0, 113, 227, 0.8);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.4);
+  transform: scale(1.15);
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.volume-control.focused {
+  background: rgba(0, 113, 227, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.5);
 }
 
 .volume-slider {
@@ -310,15 +329,21 @@
   font-size: 1rem;
 }
 
-.subtitle-option:hover {
+.subtitle-option:hover,
+.subtitle-option.focused {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 113, 227, 0.6);
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.3);
 }
 
 .subtitle-option.active {
   background: var(--accent-color);
   border-color: var(--accent-color);
   font-weight: 600;
+}
+
+.subtitle-option.active.focused {
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.5);
 }
 
 /* Responsive Design */
