@@ -50,7 +50,14 @@ function Home({ onLogout }) {
   };
 
   const handleItemClick = (item) => {
-    navigate(`/player/${item.Id}`);
+    // Check if it's a series or movie
+    if (item.Type === 'Series') {
+      // Navigate to series details page to show seasons/episodes
+      navigate(`/series/${item.Id}`);
+    } else {
+      // Navigate directly to player for movies
+      navigate(`/player/${item.Id}`);
+    }
   };
 
   if (loading) {

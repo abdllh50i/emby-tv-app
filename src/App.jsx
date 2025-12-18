@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import AccountSelection from './pages/AccountSelection';
 import Home from './pages/Home';
+import SeriesDetails from './pages/SeriesDetails';
 import VideoPlayer from './pages/VideoPlayer';
 import './App.css';
 
@@ -48,6 +49,14 @@ function App() {
             element={
               isAuthenticated ? 
                 <Home onLogout={handleLogout} /> : 
+                <Navigate to="/login" replace />
+            } 
+          />
+          <Route 
+            path="/series/:itemId" 
+            element={
+              isAuthenticated ? 
+                <SeriesDetails /> : 
                 <Navigate to="/login" replace />
             } 
           />

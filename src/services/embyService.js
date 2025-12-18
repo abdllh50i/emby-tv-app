@@ -128,6 +128,49 @@ class EmbyService {
     }
   }
 
+  // Get seasons for a series
+  async getSeasons(seriesId) {
+    this.updateCredentials();
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/Shows/${seriesId}/Seasons`,
+        {
+          params: {
+            UserId: this.userId,
+            Fields: 'PrimaryImageAspectRatio,BasicSyncInfo',
+          },
+          headers: this.getHeaders(),
+        }
+      );
+      return response.data.Items || [];
+    } catch (error) {
+      console.error('Error fetching seasons:', error);
+      throw error;
+    }
+  }
+
+  // Get episodes for a season
+  async getEpisodes(seasonId) {
+    this.updateCredentials();
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/Users/${this.userId}/Items`,
+        {
+          params: {
+            ParentId: seasonId,
+            Fields: 'PrimaryImageAspectRatio,BasicSyncInfo,Path,Overview',
+            SortBy: 'SortName',
+          },
+          headers: this.getHeaders(),
+        }
+      );
+      return response.data.Items || [];
+    } catch (error) {
+      console.error('Error fetching episodes:', error);
+      throw error;
+    }
+  }
+
   // Get playback info
   async getPlaybackInfo(itemId) {
     this.updateCredentials();

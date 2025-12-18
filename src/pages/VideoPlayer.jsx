@@ -301,6 +301,7 @@ function VideoPlayer() {
         ref={videoRef}
         className="video-element"
         src={streamUrl}
+        autoPlay
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
