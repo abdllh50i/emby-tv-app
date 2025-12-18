@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import embyService from '../services/embyService';
 import MediaRow from '../components/MediaRow';
@@ -13,6 +13,7 @@ function Home({ onLogout }) {
   const [allSeries, setAllSeries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredItem, setFeaturedItem] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     fetchMediaData();
@@ -81,9 +82,16 @@ function Home({ onLogout }) {
             <button className="nav-item">TV Shows</button>
             <button className="nav-item">Library</button>
           </nav>
-          <button className="logout-button" onClick={onLogout}>
-            Sign Out
-          </button>
+          <div className="header-actions">
+            <button className="help-button" onClick={() => setShowHelp(!showHelp)} title="Keyboard Shortcuts">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" />
+              </svg>
+            </button>
+            <button className="logout-button" onClick={onLogout}>
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -197,6 +205,66 @@ function Home({ onLogout }) {
           />
         )}
       </div>
+
+      {/* Help Overlay */}
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div
+            className="help-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowHelp(false)}
+          >
+            <motion.div
+              className="help-content"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2>Remote Control / Keyboard Shortcuts</h2>
+              <div className="shortcuts-grid">
+                <div className="shortcut-item">
+                  <div className="shortcut-key">Arrow Keys</div>
+                  <div className="shortcut-desc">Navigate through items</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">Enter</div>
+                  <div className="shortcut-desc">Select / Play</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">Escape</div>
+                  <div className="shortcut-desc">Go Back</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">Space / K</div>
+                  <div className="shortcut-desc">Play / Pause</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">F</div>
+                  <div className="shortcut-desc">Fullscreen</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">M</div>
+                  <div className="shortcut-desc">Mute / Unmute</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">Left / Right</div>
+                  <div className="shortcut-desc">Skip ±10 seconds</div>
+                </div>
+                <div className="shortcut-item">
+                  <div className="shortcut-key">Up / Down</div>
+                  <div className="shortcut-desc">Volume Control</div>
+                </div>
+              </div>
+              <button className="help-close" onClick={() => setShowHelp(false)}>
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
