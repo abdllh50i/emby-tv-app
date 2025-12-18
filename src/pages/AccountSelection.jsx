@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import embyService from '../services/embyService';
 import './AccountSelection.css';
 
+// Constants
+const REMEMBERED_USERS_KEY = 'emby_rememberedUsers';
+
+// Helper function to generate user key
+const getUserKey = (serverUrl, userId) => `${serverUrl}_${userId}`;
+
 function AccountSelection({ onLogin }) {
   const [serverUrl, setServerUrl] = useState('');
   const [users, setUsers] = useState([]);
@@ -22,7 +28,7 @@ function AccountSelection({ onLogin }) {
     }
     
     // Load remembered users
-    const savedRememberedUsers = localStorage.getItem('emby_rememberedUsers');
+    const savedRememberedUsers = localStorage.getItem(REMEMBERED_USERS_KEY);
     if (savedRememberedUsers) {
       try {
         setRememberedUsers(JSON.parse(savedRememberedUsers));
@@ -56,7 +62,7 @@ function AccountSelection({ onLogin }) {
 
   const handleUserSelect = (user) => {
     // Check if user is remembered (has stored token)
-    const userKey = `${serverUrl}_${user.Id}`;
+    const userKey = getUserKey(serverUrl, user.Id);
     if (rememberedUsers[userKey]) {
       // Auto-login with stored credentials
       onLogin(rememberedUsers[userKey].token, user.Id, serverUrl);
@@ -83,7 +89,7 @@ function AccountSelection({ onLogin }) {
       );
       
       // Save user as remembered
-      const userKey = `${serverUrl}_${selectedUser.Id}`;
+      const userKey = getUserKey(serverUrl, selectedUser.Id);
       const updatedRememberedUsers = {
         ...rememberedUsers,
         [userKey]: {
@@ -93,7 +99,7 @@ function AccountSelection({ onLogin }) {
         }
       };
       setRememberedUsers(updatedRememberedUsers);
-      localStorage.setItem('emby_rememberedUsers', JSON.stringify(updatedRememberedUsers));
+      localStorage.setItem(REMEMBERED_USERS_KEY, JSON.stringify(updatedRememberedUsers));
       
       onLogin(authData.AccessToken, authData.User.Id, serverUrl);
     } catch (err) {
@@ -235,7 +241,7 @@ function AccountSelection({ onLogin }) {
             <h2>Who&apos;s watching?</h2>
             <div className="users-list">
               {users.map((user, index) => {
-                const userKey = `${serverUrl}_${user.Id}`;
+                const userKey = getUserKey(serverUrl, user.Id);
                 const isRemembered = rememberedUsers[userKey];
                 
                 return (
