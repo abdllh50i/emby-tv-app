@@ -247,6 +247,9 @@ class EmbyService {
         itemDetails.MediaStreams
           .filter(stream => stream.Type === 'Subtitle')
           .forEach(stream => {
+            const mediaSourceId = itemDetails.MediaSources && itemDetails.MediaSources.length > 0 
+              ? itemDetails.MediaSources[0].Id 
+              : itemId;
             subtitles.push({
               index: stream.Index,
               language: stream.Language || 'Unknown',
@@ -255,7 +258,7 @@ class EmbyService {
               isExternal: stream.IsExternal,
               url: stream.DeliveryUrl 
                 ? `${this.baseUrl}${stream.DeliveryUrl}` 
-                : `${this.baseUrl}/Videos/${itemId}/${itemDetails.MediaSources[0].Id}/Subtitles/${stream.Index}/Stream.${stream.Codec}?api_key=${this.token}`,
+                : `${this.baseUrl}/Videos/${itemId}/${mediaSourceId}/Subtitles/${stream.Index}/Stream.${stream.Codec}?api_key=${this.token}`,
             });
           });
       }

@@ -55,6 +55,9 @@ function VideoPlayer() {
       setItemDetails(details);
 
       const playbackInfo = await embyService.getPlaybackInfo(itemId);
+      if (!playbackInfo.MediaSources || playbackInfo.MediaSources.length === 0) {
+        throw new Error('No media sources available');
+      }
       const mediaSource = playbackInfo.MediaSources[0];
       const url = embyService.getStreamUrl(itemId, mediaSource.Id);
       setStreamUrl(url);
@@ -212,16 +215,18 @@ function VideoPlayer() {
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setVolume((v) => Math.min(1, v + 0.1));
           if (videoRef.current) {
-            videoRef.current.volume = Math.min(1, volume + 0.1);
+            const newVolume = Math.min(1, volume + 0.1);
+            setVolume(newVolume);
+            videoRef.current.volume = newVolume;
           }
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setVolume((v) => Math.max(0, v - 0.1));
           if (videoRef.current) {
-            videoRef.current.volume = Math.max(0, volume - 0.1);
+            const newVolume = Math.max(0, volume - 0.1);
+            setVolume(newVolume);
+            videoRef.current.volume = newVolume;
           }
           break;
         case 'm':
