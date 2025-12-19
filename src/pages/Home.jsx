@@ -23,6 +23,9 @@ function Home({ onLogout }) {
     try {
       setLoading(true);
       
+      // Update credentials before fetching
+      embyService.updateCredentials();
+      
       // Fetch latest items
       const latest = await embyService.getLatestMedia('Movie,Series');
       const movies = latest.filter(item => item.Type === 'Movie');
@@ -45,6 +48,7 @@ function Home({ onLogout }) {
       
     } catch (error) {
       console.error('Error fetching media data:', error);
+      alert('Failed to load media library. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
