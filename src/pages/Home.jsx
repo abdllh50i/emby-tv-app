@@ -65,6 +65,27 @@ function Home({ onLogout }) {
     }
   };
 
+  // Calculate total sections and map section indices to rows
+  const getTotalSections = () => {
+    return 1 + // Hero section
+           (latestMovies.length > 0 ? 1 : 0) +
+           (latestSeries.length > 0 ? 1 : 0) +
+           (allMovies.length > 0 ? 1 : 0) +
+           (allSeries.length > 0 ? 1 : 0);
+  };
+
+  const getSectionIndex = (rowName) => {
+    let index = 1; // Start after hero (section 0)
+    if (rowName === 'latestMovies' && latestMovies.length > 0) return index;
+    if (latestMovies.length > 0) index++;
+    if (rowName === 'latestSeries' && latestSeries.length > 0) return index;
+    if (latestSeries.length > 0) index++;
+    if (rowName === 'allMovies' && allMovies.length > 0) return index;
+    if (allMovies.length > 0) index++;
+    if (rowName === 'allSeries' && allSeries.length > 0) return index;
+    return -1;
+  };
+
   // Enhanced keyboard navigation for the entire page
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -81,8 +102,7 @@ function Home({ onLogout }) {
           break;
         case 'ArrowDown':
           e.preventDefault();
-          const totalSections = 1 + (latestMovies.length > 0 ? 1 : 0) + (latestSeries.length > 0 ? 1 : 0) + 
-                                (allMovies.length > 0 ? 1 : 0) + (allSeries.length > 0 ? 1 : 0);
+          const totalSections = getTotalSections();
           if (activeSection < totalSections - 1) {
             setActiveSection(activeSection + 1);
             setActiveRowIndex(activeSection > 0 ? 0 : -1);
@@ -256,53 +276,53 @@ function Home({ onLogout }) {
       {/* Content Sections */}
       <div className="content-sections">
         {latestMovies.length > 0 && (
-          <div className={`row-wrapper ${activeSection === 1 ? 'active-row' : ''}`}>
+          <div className={`row-wrapper ${activeSection === getSectionIndex('latestMovies') ? 'active-row' : ''}`}>
             <MediaRow
               ref={(el) => (rowRefs.current[0] = el)}
               title="Latest Movies"
               items={latestMovies}
               onItemClick={handleItemClick}
-              isActive={activeSection === 1}
-              initialFocusIndex={activeSection === 1 ? 0 : -1}
+              isActive={activeSection === getSectionIndex('latestMovies')}
+              initialFocusIndex={activeSection === getSectionIndex('latestMovies') ? 0 : -1}
             />
           </div>
         )}
 
         {latestSeries.length > 0 && (
-          <div className={`row-wrapper ${activeSection === (latestMovies.length > 0 ? 2 : 1) ? 'active-row' : ''}`}>
+          <div className={`row-wrapper ${activeSection === getSectionIndex('latestSeries') ? 'active-row' : ''}`}>
             <MediaRow
               ref={(el) => (rowRefs.current[1] = el)}
               title="Latest TV Shows"
               items={latestSeries}
               onItemClick={handleItemClick}
-              isActive={activeSection === (latestMovies.length > 0 ? 2 : 1)}
-              initialFocusIndex={activeSection === (latestMovies.length > 0 ? 2 : 1) ? 0 : -1}
+              isActive={activeSection === getSectionIndex('latestSeries')}
+              initialFocusIndex={activeSection === getSectionIndex('latestSeries') ? 0 : -1}
             />
           </div>
         )}
 
         {allMovies.length > 0 && (
-          <div className={`row-wrapper ${activeSection === (2 + (latestSeries.length > 0 ? 1 : 0)) ? 'active-row' : ''}`}>
+          <div className={`row-wrapper ${activeSection === getSectionIndex('allMovies') ? 'active-row' : ''}`}>
             <MediaRow
               ref={(el) => (rowRefs.current[2] = el)}
               title="All Movies"
               items={allMovies}
               onItemClick={handleItemClick}
-              isActive={activeSection === (2 + (latestSeries.length > 0 ? 1 : 0))}
-              initialFocusIndex={activeSection === (2 + (latestSeries.length > 0 ? 1 : 0)) ? 0 : -1}
+              isActive={activeSection === getSectionIndex('allMovies')}
+              initialFocusIndex={activeSection === getSectionIndex('allMovies') ? 0 : -1}
             />
           </div>
         )}
 
         {allSeries.length > 0 && (
-          <div className={`row-wrapper ${activeSection === (3 + (latestSeries.length > 0 ? 1 : 0)) ? 'active-row' : ''}`}>
+          <div className={`row-wrapper ${activeSection === getSectionIndex('allSeries') ? 'active-row' : ''}`}>
             <MediaRow
               ref={(el) => (rowRefs.current[3] = el)}
               title="All TV Shows"
               items={allSeries}
               onItemClick={handleItemClick}
-              isActive={activeSection === (3 + (latestSeries.length > 0 ? 1 : 0))}
-              initialFocusIndex={activeSection === (3 + (latestSeries.length > 0 ? 1 : 0)) ? 0 : -1}
+              isActive={activeSection === getSectionIndex('allSeries')}
+              initialFocusIndex={activeSection === getSectionIndex('allSeries') ? 0 : -1}
             />
           </div>
         )}

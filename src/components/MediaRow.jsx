@@ -2,6 +2,9 @@ import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 're
 import MediaCard from './MediaCard';
 import './MediaRow.css';
 
+// Approximate width of a media card for auto-scrolling calculations
+const CARD_WIDTH = 220;
+
 const MediaRow = forwardRef(({ title, items, onItemClick, isActive = false, initialFocusIndex = -1 }, ref) => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -64,8 +67,7 @@ const MediaRow = forwardRef(({ title, items, onItemClick, isActive = false, init
             setFocusedIndex(focusedIndex - 1);
             // Auto-scroll left if needed
             if (scrollRef.current) {
-              const cardWidth = 220; // approximate card width
-              scrollRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+              scrollRef.current.scrollBy({ left: -CARD_WIDTH, behavior: 'smooth' });
             }
           }
           break;
@@ -75,8 +77,7 @@ const MediaRow = forwardRef(({ title, items, onItemClick, isActive = false, init
             setFocusedIndex(focusedIndex + 1);
             // Auto-scroll right if needed
             if (scrollRef.current) {
-              const cardWidth = 220;
-              scrollRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+              scrollRef.current.scrollBy({ left: CARD_WIDTH, behavior: 'smooth' });
             }
           }
           break;
