@@ -5,12 +5,13 @@ import './AccountSelection.css';
 
 // Constants
 const REMEMBERED_USERS_KEY = 'emby_rememberedUsers';
+const DEFAULT_SERVER_URL = 'https://emby.abod-emby-server.online';
 
 // Helper function to generate user key
 const getUserKey = (serverUrl, userId) => `${serverUrl}_${userId}`;
 
 function AccountSelection({ onLogin }) {
-  const [serverUrl, setServerUrl] = useState('');
+  const [serverUrl, setServerUrl] = useState(DEFAULT_SERVER_URL);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [password, setPassword] = useState('');
@@ -19,13 +20,15 @@ function AccountSelection({ onLogin }) {
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [rememberedUsers, setRememberedUsers] = useState({});
+  const [serverConnected, setServerConnected] = useState(false);
 
   useEffect(() => {
     const savedServerUrl = localStorage.getItem('emby_serverUrl');
-    if (savedServerUrl) {
-      setServerUrl(savedServerUrl);
-      fetchPublicUsers(savedServerUrl);
-    }
+    const urlToUse = savedServerUrl || DEFAULT_SERVER_URL;
+    setServerUrl(urlToUse);
+    
+    // Auto-connect to default/saved server
+    fetchPublicUsers(urlToUse);
     
     // Load remembered users
     const savedRememberedUsers = localStorage.getItem(REMEMBERED_USERS_KEY);
@@ -43,10 +46,12 @@ function AccountSelection({ onLogin }) {
       setLoading(true);
       const publicUsers = await embyService.getPublicUsers(url);
       setUsers(publicUsers);
+      setServerConnected(true);
       setError('');
     } catch (err) {
       setError('Failed to connect to server. Please check the URL.');
       setUsers([]);
+      setServerConnected(false);
     } finally {
       setLoading(false);
     }
@@ -120,22 +125,54 @@ function AccountSelection({ onLogin }) {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (showPasswordInput) return;
+      if (showPasswordInput) {
+        // In password view, Escape goes back
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleBack();
+        }
+        return;
+      }
+
+      if (!serverConnected || users.length === 0) return;
+
+      const gridColumns = 3; // 3 users per row
+      const totalUsers = users.length;
 
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
-          setFocusedIndex((prev) => Math.max(0, prev - 1));
+          setFocusedIndex((prev) => {
+            const newIndex = prev - gridColumns;
+            return newIndex >= 0 ? newIndex : prev;
+          });
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setFocusedIndex((prev) => Math.min(users.length - 1, prev + 1));
+          setFocusedIndex((prev) => {
+            const newIndex = prev + gridColumns;
+            return newIndex < totalUsers ? newIndex : prev;
+          });
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          setFocusedIndex((prev) => Math.max(0, prev - 1));
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setFocusedIndex((prev) => Math.min(totalUsers - 1, prev + 1));
           break;
         case 'Enter':
           e.preventDefault();
           if (users[focusedIndex]) {
             handleUserSelect(users[focusedIndex]);
           }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          // Allow changing server
+          setUsers([]);
+          setServerConnected(false);
           break;
         default:
           break;
@@ -144,7 +181,7 @@ function AccountSelection({ onLogin }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [users, focusedIndex, showPasswordInput]);
+  }, [users, focusedIndex, showPasswordInput, serverConnected]);
 
   return (
     <div className="account-selection">
@@ -178,13 +215,16 @@ function AccountSelection({ onLogin }) {
             <motion.button
               type="submit"
               className="connect-button"
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(0, 113, 227, 0.5)' }}
               whileTap={{ scale: 0.95 }}
               disabled={loading}
             >
               {loading ? 'Connecting...' : 'Connect'}
             </motion.button>
             {error && <p className="error-message">{error}</p>}
+            <div className="keyboard-hint">
+              <p>Press <kbd>Enter</kbd> to connect</p>
+            </div>
           </motion.form>
         ) : showPasswordInput ? (
           <motion.form
@@ -249,11 +289,11 @@ function AccountSelection({ onLogin }) {
                     key={user.Id}
                     className={`user-card ${focusedIndex === index ? 'focused' : ''} ${isRemembered ? 'remembered' : ''}`}
                     onClick={() => handleUserSelect(user)}
-                    whileHover={{ scale: 1.1, y: -10 }}
+                    whileHover={{ scale: 1.08, y: -8 }}
                     whileTap={{ scale: 0.95 }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.08 }}
                   >
                     <div className="user-avatar">
                       {user.PrimaryImageTag ? (
@@ -275,9 +315,15 @@ function AccountSelection({ onLogin }) {
                       )}
                     </div>
                     <p className="user-name">{user.Name}</p>
+                    {isRemembered && <p className="user-status">Auto-login</p>}
                   </motion.div>
                 );
               })}
+            </div>
+            <div className="keyboard-hint">
+              <p>
+                Use <kbd>Arrow Keys</kbd> to navigate &nbsp;•&nbsp; Press <kbd>Enter</kbd> to select &nbsp;•&nbsp; Press <kbd>Esc</kbd> to change server
+              </p>
             </div>
           </motion.div>
         )}

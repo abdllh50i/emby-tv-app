@@ -8,13 +8,16 @@ import './App.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAccountSelection, setShowAccountSelection] = useState(true);
 
   useEffect(() => {
-    // Check if user is already authenticated
+    // Always start at account selection page, but check if user was authenticated
     const token = localStorage.getItem('emby_token');
     const userId = localStorage.getItem('emby_userId');
     if (token && userId) {
-      setIsAuthenticated(true);
+      // User was authenticated before, but we still show account selection
+      // They can auto-login if they're remembered
+      setShowAccountSelection(true);
     }
   }, []);
 
@@ -23,13 +26,15 @@ function App() {
     localStorage.setItem('emby_userId', userId);
     localStorage.setItem('emby_serverUrl', serverUrl);
     setIsAuthenticated(true);
+    setShowAccountSelection(false);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('emby_token');
     localStorage.removeItem('emby_userId');
-    localStorage.removeItem('emby_serverUrl');
+    // Keep serverUrl and remembered users so they can auto-login next time
     setIsAuthenticated(false);
+    setShowAccountSelection(true);
   };
 
   return (
@@ -68,7 +73,7 @@ function App() {
                 <Navigate to="/login" replace />
             } 
           />
-          <Route path="/" element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </Router>
