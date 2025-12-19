@@ -14,10 +14,6 @@ function Home({ onLogout }) {
   const [loading, setLoading] = useState(true);
   const [featuredItem, setFeaturedItem] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
-  const [activeSection, setActiveSection] = useState(0); // 0=hero, 1=row1, 2=row2, etc.
-  const [activeRowIndex, setActiveRowIndex] = useState(-1);
-  const heroPlayButtonRef = useRef(null);
-  const rowRefs = useRef([]);
 
   useEffect(() => {
     fetchMediaData();
@@ -65,67 +61,20 @@ function Home({ onLogout }) {
     }
   };
 
-  // Calculate total sections and map section indices to rows
-  const getTotalSections = () => {
-    return 1 + // Hero section
-           (latestMovies.length > 0 ? 1 : 0) +
-           (latestSeries.length > 0 ? 1 : 0) +
-           (allMovies.length > 0 ? 1 : 0) +
-           (allSeries.length > 0 ? 1 : 0);
-  };
-
-  const getSectionIndex = (rowName) => {
-    let index = 1; // Start after hero (section 0)
-    if (rowName === 'latestMovies' && latestMovies.length > 0) return index;
-    if (latestMovies.length > 0) index++;
-    if (rowName === 'latestSeries' && latestSeries.length > 0) return index;
-    if (latestSeries.length > 0) index++;
-    if (rowName === 'allMovies' && allMovies.length > 0) return index;
-    if (allMovies.length > 0) index++;
-    if (rowName === 'allSeries' && allSeries.length > 0) return index;
-    return -1;
-  };
-
-  // Enhanced keyboard navigation for the entire page
+  // Simple keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Don't handle if help is showing
       if (showHelp) return;
 
       switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          if (activeSection > 0) {
-            setActiveSection(activeSection - 1);
-            setActiveRowIndex(-1);
-          }
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          const totalSections = getTotalSections();
-          if (activeSection < totalSections - 1) {
-            setActiveSection(activeSection + 1);
-            setActiveRowIndex(activeSection > 0 ? 0 : -1);
-          }
-          break;
-        case 'Enter':
-          e.preventDefault();
-          if (activeSection === 0 && featuredItem) {
-            handleItemClick(featuredItem);
-          } else if (activeSection > 0) {
-            // Let MediaRow handle the Enter key
-          }
-          break;
-        case 'Escape':
-          e.preventDefault();
-          if (activeSection > 0) {
-            setActiveSection(0);
-            setActiveRowIndex(-1);
-          }
-          break;
         case '?':
           e.preventDefault();
           setShowHelp(!showHelp);
+          break;
+        case 'Escape':
+          e.preventDefault();
+          // Global escape - can be handled by individual components
           break;
         default:
           break;
@@ -134,14 +83,7 @@ function Home({ onLogout }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSection, showHelp, featuredItem, latestMovies, latestSeries, allMovies, allSeries]);
-
-  // Auto-focus hero play button when section is 0
-  useEffect(() => {
-    if (activeSection === 0 && heroPlayButtonRef.current) {
-      heroPlayButtonRef.current.focus();
-    }
-  }, [activeSection]);
+  }, [showHelp]);
 
   if (loading) {
     return (
@@ -180,7 +122,7 @@ function Home({ onLogout }) {
       {/* Featured Hero Section */}
       {featuredItem && (
         <motion.div
-          className={`hero-section ${activeSection === 0 ? 'active' : ''}`}
+          className="hero-section"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -234,8 +176,7 @@ function Home({ onLogout }) {
               )}
               <div className="hero-actions">
                 <motion.button
-                  ref={heroPlayButtonRef}
-                  className={`play-button ${activeSection === 0 ? 'focused' : ''}`}
+                  className="play-button"
                   whileHover={{ scale: 1.08, boxShadow: '0 12px 35px rgba(255, 255, 255, 0.35)' }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleItemClick(featuredItem)}
@@ -263,11 +204,6 @@ function Home({ onLogout }) {
                   More Info
                 </motion.button>
               </div>
-              {activeSection === 0 && (
-                <div className="hero-hint">
-                  <kbd>↓</kbd> Browse Library • <kbd>Enter</kbd> Play • <kbd>?</kbd> Help
-                </div>
-              )}
             </motion.div>
           </div>
         </motion.div>
@@ -276,55 +212,35 @@ function Home({ onLogout }) {
       {/* Content Sections */}
       <div className="content-sections">
         {latestMovies.length > 0 && (
-          <div className={`row-wrapper ${activeSection === getSectionIndex('latestMovies') ? 'active-row' : ''}`}>
-            <MediaRow
-              ref={(el) => (rowRefs.current[0] = el)}
-              title="Latest Movies"
-              items={latestMovies}
-              onItemClick={handleItemClick}
-              isActive={activeSection === getSectionIndex('latestMovies')}
-              initialFocusIndex={activeSection === getSectionIndex('latestMovies') ? 0 : -1}
-            />
-          </div>
+          <MediaRow
+            title="Latest Movies"
+            items={latestMovies}
+            onItemClick={handleItemClick}
+          />
         )}
 
         {latestSeries.length > 0 && (
-          <div className={`row-wrapper ${activeSection === getSectionIndex('latestSeries') ? 'active-row' : ''}`}>
-            <MediaRow
-              ref={(el) => (rowRefs.current[1] = el)}
-              title="Latest TV Shows"
-              items={latestSeries}
-              onItemClick={handleItemClick}
-              isActive={activeSection === getSectionIndex('latestSeries')}
-              initialFocusIndex={activeSection === getSectionIndex('latestSeries') ? 0 : -1}
-            />
-          </div>
+          <MediaRow
+            title="Latest TV Shows"
+            items={latestSeries}
+            onItemClick={handleItemClick}
+          />
         )}
 
         {allMovies.length > 0 && (
-          <div className={`row-wrapper ${activeSection === getSectionIndex('allMovies') ? 'active-row' : ''}`}>
-            <MediaRow
-              ref={(el) => (rowRefs.current[2] = el)}
-              title="All Movies"
-              items={allMovies}
-              onItemClick={handleItemClick}
-              isActive={activeSection === getSectionIndex('allMovies')}
-              initialFocusIndex={activeSection === getSectionIndex('allMovies') ? 0 : -1}
-            />
-          </div>
+          <MediaRow
+            title="All Movies"
+            items={allMovies}
+            onItemClick={handleItemClick}
+          />
         )}
 
         {allSeries.length > 0 && (
-          <div className={`row-wrapper ${activeSection === getSectionIndex('allSeries') ? 'active-row' : ''}`}>
-            <MediaRow
-              ref={(el) => (rowRefs.current[3] = el)}
-              title="All TV Shows"
-              items={allSeries}
-              onItemClick={handleItemClick}
-              isActive={activeSection === getSectionIndex('allSeries')}
-              initialFocusIndex={activeSection === getSectionIndex('allSeries') ? 0 : -1}
-            />
-          </div>
+          <MediaRow
+            title="All TV Shows"
+            items={allSeries}
+            onItemClick={handleItemClick}
+          />
         )}
       </div>
 

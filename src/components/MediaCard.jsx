@@ -2,17 +2,16 @@ import { motion } from 'framer-motion';
 import embyService from '../services/embyService';
 import './MediaCard.css';
 
-function MediaCard({ item, onClick, index = 0, isFocused = false }) {
+function MediaCard({ item, onClick }) {
   const imageUrl = embyService.getImageUrl(item.Id, 'Primary', 400);
 
   return (
     <motion.div
-      className={`media-card ${isFocused ? 'focused' : ''}`}
+      className="media-card"
       onClick={() => onClick(item)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ 
-        delay: index * 0.05, 
         duration: 0.4,
         ease: [0.25, 0.1, 0.25, 1]
       }}

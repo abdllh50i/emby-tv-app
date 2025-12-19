@@ -1,29 +1,11 @@
-import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import MediaCard from './MediaCard';
 import './MediaRow.css';
 
-// Approximate width of a media card for auto-scrolling calculations
-const CARD_WIDTH = 220;
-
-const MediaRow = forwardRef(({ title, items, onItemClick, isActive = false, initialFocusIndex = -1 }, ref) => {
+const MediaRow = ({ title, items, onItemClick }) => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [focusedIndex, setFocusedIndex] = useState(initialFocusIndex);
-
-  useImperativeHandle(ref, () => ({
-    setFocusedIndex,
-    focusedIndex,
-  }));
-
-  // Update focused index when initialFocusIndex changes
-  useEffect(() => {
-    if (isActive && initialFocusIndex >= 0) {
-      setFocusedIndex(initialFocusIndex);
-    } else if (!isActive) {
-      setFocusedIndex(-1);
-    }
-  }, [isActive, initialFocusIndex]);
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -149,8 +131,6 @@ const MediaRow = forwardRef(({ title, items, onItemClick, isActive = false, init
       </div>
     </div>
   );
-});
-
-MediaRow.displayName = 'MediaRow';
+};
 
 export default MediaRow;

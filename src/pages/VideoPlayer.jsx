@@ -30,8 +30,7 @@ function VideoPlayer() {
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
   const [buffering, setBuffering] = useState(false);
   
-  // TV-style navigation state
-  const [focusedControl, setFocusedControl] = useState(null);
+  // Subtitle menu navigation state
   const [focusedSubtitle, setFocusedSubtitle] = useState(0);
 
   useEffect(() => {
@@ -266,10 +265,8 @@ function VideoPlayer() {
     navigate('/home');
   };
 
-  // TV-style keyboard navigation
+  // Traditional TV remote keyboard navigation
   useEffect(() => {
-    const controls = ['back', 'play', 'rewind', 'forward', 'mute', 'volume', 'subtitles', 'fullscreen', 'progress'];
-    
     const handleKeyDown = (e) => {
       // If subtitle menu is open, handle that separately
       if (showSubtitleMenu) {
@@ -291,9 +288,10 @@ function VideoPlayer() {
             }
             break;
           case 'Escape':
+          case 's':
+          case 'S':
             e.preventDefault();
             setShowSubtitleMenu(false);
-            setFocusedControl('subtitles');
             break;
           default:
             break;
@@ -301,102 +299,87 @@ function VideoPlayer() {
         return;
       }
 
-      // Main player navigation
+      // Traditional TV remote controls
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
-          if (focusedControl === null) {
-            setFocusedControl('back');
-            setShowControls(true);
-          } else {
-            const currentIndex = controls.indexOf(focusedControl);
-            const newIndex = currentIndex > 0 ? currentIndex - 1 : controls.length - 1;
-            setFocusedControl(controls[newIndex]);
-            setShowControls(true);
+          // Seek backward 10 seconds
+          if (videoRef.current) {
+            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
           }
+          setShowControls(true);
           break;
           
         case 'ArrowRight':
           e.preventDefault();
-          if (focusedControl === null) {
-            setFocusedControl('back');
-            setShowControls(true);
-          } else {
-            const currentIndex = controls.indexOf(focusedControl);
-            const newIndex = currentIndex < controls.length - 1 ? currentIndex + 1 : 0;
-            setFocusedControl(controls[newIndex]);
-            setShowControls(true);
+          // Seek forward 10 seconds
+          if (videoRef.current) {
+            videoRef.current.currentTime = Math.min(duration, videoRef.current.currentTime + 10);
           }
+          setShowControls(true);
           break;
           
         case 'ArrowUp':
-        case 'ArrowDown':
           e.preventDefault();
-          // Show controls and focus on first control
-          if (focusedControl === null) {
-            setFocusedControl('play');
+          // Volume up
+          if (videoRef.current) {
+            const newVolume = Math.min(1, volume + 0.1);
+            setVolume(newVolume);
+            videoRef.current.volume = newVolume;
+            setIsMuted(false);
+            videoRef.current.muted = false;
           }
           setShowControls(true);
           break;
           
-        case 'Enter':
+        case 'ArrowDown':
           e.preventDefault();
-          setShowControls(true);
-          switch (focusedControl) {
-            case 'back':
-              handleBack();
-              break;
-            case 'play':
-              handlePlayPause();
-              break;
-            case 'rewind':
-              if (videoRef.current) {
-                videoRef.current.currentTime = Math.max(0, currentTime - 10);
-              }
-              break;
-            case 'forward':
-              if (videoRef.current) {
-                videoRef.current.currentTime = Math.min(duration, currentTime + 10);
-              }
-              break;
-            case 'mute':
-              toggleMute();
-              break;
-            case 'volume':
-              // Cycle volume: 0 -> 0.5 -> 1 -> 0
-              if (videoRef.current) {
-                const newVolume = volume === 0 ? 0.5 : volume === 0.5 ? 1 : 0;
-                setVolume(newVolume);
-                videoRef.current.volume = newVolume;
-                setIsMuted(newVolume === 0);
-              }
-              break;
-            case 'subtitles':
-              setShowSubtitleMenu(true);
-              setFocusedSubtitle(0);
-              break;
-            case 'fullscreen':
-              toggleFullscreen();
-              break;
-            case 'progress':
-              // Allow seeking with left/right when progress is focused
-              break;
-            default:
-              break;
+          // Volume down
+          if (videoRef.current) {
+            const newVolume = Math.max(0, volume - 0.1);
+            setVolume(newVolume);
+            videoRef.current.volume = newVolume;
+            if (newVolume === 0) {
+              setIsMuted(true);
+              videoRef.current.muted = true;
+            }
           }
+          setShowControls(true);
           break;
           
         case ' ':
         case 'k':
+        case 'K':
           e.preventDefault();
           handlePlayPause();
+          setShowControls(true);
+          break;
+          
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+          
+        case 'm':
+        case 'M':
+          e.preventDefault();
+          toggleMute();
+          setShowControls(true);
+          break;
+          
+        case 's':
+        case 'S':
+          e.preventDefault();
+          setShowSubtitleMenu(true);
+          setFocusedSubtitle(selectedSubtitle ? subtitles.indexOf(selectedSubtitle) + 1 : 0);
           break;
           
         case 'Escape':
           e.preventDefault();
-          if (focusedControl !== null) {
-            setFocusedControl(null);
-          } else if (!isFullscreen) {
+          if (isFullscreen) {
+            toggleFullscreen();
+          } else {
             handleBack();
           }
           break;
@@ -408,7 +391,7 @@ function VideoPlayer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedControl, showSubtitleMenu, focusedSubtitle, subtitles, isPlaying, currentTime, duration, volume, isFullscreen]);
+  }, [showSubtitleMenu, focusedSubtitle, volume, duration, isFullscreen, subtitles, selectedSubtitle]);
 
   // Progress reporting
   useEffect(() => {
@@ -517,7 +500,7 @@ function VideoPlayer() {
           >
             {/* Top Bar */}
             <div className="controls-top">
-              <button className={`back-button ${focusedControl === 'back' ? 'focused' : ''}`} onClick={handleBack}>
+              <button className={`back-button `} onClick={handleBack}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                 </svg>
@@ -533,7 +516,7 @@ function VideoPlayer() {
             {/* Bottom Controls */}
             <div className="controls-bottom">
               {/* Progress Bar */}
-              <div className={`progress-bar ${focusedControl === 'progress' ? 'focused' : ''}`} onClick={handleSeek}>
+              <div className={`progress-bar `} onClick={handleSeek}>
                 <div 
                   className="progress-filled"
                   style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
@@ -543,7 +526,7 @@ function VideoPlayer() {
               {/* Control Buttons */}
               <div className="controls-buttons">
                 <div className="controls-left">
-                  <button className={`control-button ${focusedControl === 'play' ? 'focused' : ''}`} onClick={handlePlayPause}>
+                  <button className={`control-button `} onClick={handlePlayPause}>
                     {isPlaying ? (
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
@@ -556,7 +539,7 @@ function VideoPlayer() {
                   </button>
 
                   <button 
-                    className={`control-button ${focusedControl === 'rewind' ? 'focused' : ''}`}
+                    className={`control-button `}
                     onClick={() => videoRef.current && (videoRef.current.currentTime -= 10)}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -565,7 +548,7 @@ function VideoPlayer() {
                   </button>
 
                   <button 
-                    className={`control-button ${focusedControl === 'forward' ? 'focused' : ''}`}
+                    className={`control-button `}
                     onClick={() => videoRef.current && (videoRef.current.currentTime += 10)}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -573,7 +556,7 @@ function VideoPlayer() {
                     </svg>
                   </button>
 
-                  <button className={`control-button ${focusedControl === 'mute' ? 'focused' : ''}`} onClick={toggleMute}>
+                  <button className={`control-button `} onClick={toggleMute}>
                     {isMuted || volume === 0 ? (
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
@@ -585,7 +568,7 @@ function VideoPlayer() {
                     )}
                   </button>
 
-                  <div className={`volume-control ${focusedControl === 'volume' ? 'focused' : ''}`}>
+                  <div className={`volume-control `}>
                     <input
                       type="range"
                       min="0"
@@ -604,7 +587,7 @@ function VideoPlayer() {
 
                 <div className="controls-right">
                   <button 
-                    className={`control-button ${focusedControl === 'subtitles' ? 'focused' : ''}`}
+                    className={`control-button `}
                     onClick={() => setShowSubtitleMenu(!showSubtitleMenu)}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -612,7 +595,7 @@ function VideoPlayer() {
                     </svg>
                   </button>
 
-                  <button className={`control-button ${focusedControl === 'fullscreen' ? 'focused' : ''}`} onClick={toggleFullscreen}>
+                  <button className={`control-button `} onClick={toggleFullscreen}>
                     {isFullscreen ? (
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
