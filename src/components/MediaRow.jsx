@@ -1,12 +1,26 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import MediaCard from './MediaCard';
 import './MediaRow.css';
 
-function MediaRow({ title, items, onItemClick }) {
+const MediaRow = forwardRef(({ title, items, onItemClick, isActive = false, initialFocusIndex = -1 }, ref) => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [focusedIndex, setFocusedIndex] = useState(initialFocusIndex);
+
+  useImperativeHandle(ref, () => ({
+    setFocusedIndex,
+    focusedIndex,
+  }));
+
+  // Update focused index when initialFocusIndex changes
+  useEffect(() => {
+    if (isActive && initialFocusIndex >= 0) {
+      setFocusedIndex(initialFocusIndex);
+    } else if (!isActive) {
+      setFocusedIndex(-1);
+    }
+  }, [isActive, initialFocusIndex]);
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -38,6 +52,8 @@ function MediaRow({ title, items, onItemClick }) {
 
   // Keyboard navigation
   useEffect(() => {
+    if (!isActive) return;
+
     const handleKeyDown = (e) => {
       if (focusedIndex === -1) return;
 
@@ -46,12 +62,22 @@ function MediaRow({ title, items, onItemClick }) {
           e.preventDefault();
           if (focusedIndex > 0) {
             setFocusedIndex(focusedIndex - 1);
+            // Auto-scroll left if needed
+            if (scrollRef.current) {
+              const cardWidth = 220; // approximate card width
+              scrollRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+            }
           }
           break;
         case 'ArrowRight':
           e.preventDefault();
           if (focusedIndex < items.length - 1) {
             setFocusedIndex(focusedIndex + 1);
+            // Auto-scroll right if needed
+            if (scrollRef.current) {
+              const cardWidth = 220;
+              scrollRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            }
           }
           break;
         case 'Enter':
@@ -67,7 +93,7 @@ function MediaRow({ title, items, onItemClick }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedIndex, items, onItemClick]);
+  }, [focusedIndex, items, onItemClick, isActive]);
 
   if (!items || items.length === 0) {
     return null;
@@ -75,7 +101,14 @@ function MediaRow({ title, items, onItemClick }) {
 
   return (
     <div className="media-row">
-      <h2 className="row-title">{title}</h2>
+      <div className="row-header">
+        <h2 className="row-title">{title}</h2>
+        {isActive && (
+          <div className="row-hint">
+            <kbd>←</kbd> <kbd>→</kbd> Navigate • <kbd>Enter</kbd> Play • <kbd>↑</kbd> <kbd>↓</kbd> Change Row
+          </div>
+        )}
+      </div>
       <div className="row-container">
         {canScrollLeft && (
           <button
@@ -115,6 +148,8 @@ function MediaRow({ title, items, onItemClick }) {
       </div>
     </div>
   );
-}
+});
+
+MediaRow.displayName = 'MediaRow';
 
 export default MediaRow;
