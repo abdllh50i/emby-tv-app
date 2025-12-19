@@ -32,7 +32,8 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('emby_token');
     localStorage.removeItem('emby_userId');
-    // Keep serverUrl and remembered users so they can auto-login next time
+    // Keep serverUrl and remembered users for easy re-login
+    // (localStorage items are preserved)
     setIsAuthenticated(false);
     setShowAccountSelection(true);
   };

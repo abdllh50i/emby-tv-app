@@ -5,7 +5,8 @@ import './AccountSelection.css';
 
 // Constants
 const REMEMBERED_USERS_KEY = 'emby_rememberedUsers';
-const DEFAULT_SERVER_URL = 'https://emby.abod-emby-server.online';
+// Default server URL - can be overridden in production via environment variable
+const DEFAULT_SERVER_URL = import.meta.env.VITE_DEFAULT_SERVER_URL || 'https://emby.abod-emby-server.online';
 
 // Helper function to generate user key
 const getUserKey = (serverUrl, userId) => `${serverUrl}_${userId}`;
@@ -214,8 +215,8 @@ function AccountSelection({ onLogin }) {
             />
             <motion.button
               type="submit"
-              className="connect-button"
-              whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(0, 113, 227, 0.5)' }}
+              className="connect-button connect-button-hover"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               disabled={loading}
             >
